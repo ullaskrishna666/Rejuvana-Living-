@@ -1,7 +1,18 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ContactFormData } from '../types';
+import { ContactFormData } from '../types.ts';
+
+/**
+ * REJUVANA INTEGRATION SETTINGS
+ * Optimized for Hostinger Reach / MailerLite V2 compatibility.
+ */
+const INTEGRATION_SETTINGS = {
+  USE_MOCK_SERVICE: false, 
+  REACH_API_ENDPOINT: 'https://developers.hostinger.com/api/reach/v1/contacts',
+  API_KEY: 'EKznBzSVA7U5lRwIECSZjAN9Fe9SArBnnmGprn3m99e1b1f4', 
+  TEAM_EMAIL: 'hello@rejuvanaliving.com'
+};
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState<ContactFormData>({
@@ -9,54 +20,87 @@ const Contact: React.FC = () => {
     email: '',
     message: ''
   });
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('loading');
+    setStatus('syncing');
 
     try {
-      // Simulating connection to Hostinger Reach via mock API
-      const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
-        method: 'POST',
-        body: JSON.stringify({
-          title: `Wellness Journey Lead: ${formData.name}`,
-          body: formData.message,
-          email: formData.email,
-        }),
-        headers: {
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-      });
+      // Split name into First Name (name) and Last Name (surname)
+      const nameParts = formData.name.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '-'; 
 
-      if (response.ok) {
-        setTimeout(() => {
-          setStatus('success');
-          setShowModal(true);
-          setFormData({ name: '', email: '', message: '' });
-        }, 1500);
+      /**
+       * OPTIMIZED PAYLOAD STRUCTURE
+       * We provide root-level keys AND a fields object to ensure the Hostinger 
+       * Dashboard maps the data correctly to its UI cards.
+       */
+      const payload = {
+        email: formData.email,
+        name: firstName,         
+        surname: lastName,      
+        note: formData.message,
+        fields: {
+          name: firstName,
+          last_name: lastName,
+          surname: lastName,
+          note: formData.message
+        },
+        status: 'subscribed'
+      };
+
+      if (INTEGRATION_SETTINGS.USE_MOCK_SERVICE) {
+        await new Promise(resolve => setTimeout(resolve, 1500));
       } else {
-        throw new Error('Connection timed out');
+        const response = await fetch(INTEGRATION_SETTINGS.REACH_API_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${INTEGRATION_SETTINGS.API_KEY}`
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorInfo = await response.json().catch(() => ({}));
+          console.error('API Error details:', errorInfo);
+          throw new Error('Connection failed.');
+        }
       }
-    } catch (error) {
+
+      setStatus('success');
+      setShowModal(true);
+      setFormData({ name: '', email: '', message: '' });
+
+    } catch (error: any) {
+      console.error("Sync Error:", error.message);
       setStatus('error');
-      setErrorMessage('We encountered a temporary connection issue. Please try again.');
-      setTimeout(() => setStatus('idle'), 4000);
+      setErrorMessage('Could not complete your request. Please try again or reach out via email.');
+      setTimeout(() => setStatus('idle'), 5000);
     }
+  };
+
+  const getButtonText = () => {
+    if (status === 'syncing') return 'Processing...';
+    if (status === 'error') return 'Try Again';
+    return 'Begin Your Wellness Journey';
   };
 
   return (
     <section id="join-community" className="py-24 bg-slate-50 relative">
       <div className="container mx-auto px-6 md:px-12">
         <div className="max-w-5xl mx-auto bg-slate-900 rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row">
-          {/* Left Panel */}
+          {/* Brand Panel */}
           <div className="md:w-5/12 p-12 lg:p-16 text-white bg-teal-600 flex flex-col justify-between">
             <div>
-              <h2 className="text-4xl font-serif font-bold mb-6 tracking-tight">Join the Community</h2>
+              <h2 className="text-4xl font-serif font-bold mb-6 tracking-tight">Join the Circle</h2>
               <p className="text-teal-50 text-lg mb-12 opacity-90 leading-relaxed">
-                Your path to longevity starts with a single conversation. Connect with our dedicated support team via our Hostinger Reach channel.
+                Start your personalized longevity protocol. Once you reach out, our wellness directory is updated and our team is alerted to your goals.
               </p>
               
               <div className="space-y-8">
@@ -67,16 +111,28 @@ const Contact: React.FC = () => {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-widest text-teal-100 font-bold mb-1">Expert Support</p>
-                    <span className="text-lg font-medium">hello@rejuvanaliving.com</span>
+                    <p className="text-[10px] uppercase tracking-widest text-teal-100 font-bold mb-1">Direct Communication</p>
+                    <span className="text-lg font-medium">{INTEGRATION_SETTINGS.TEAM_EMAIL}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-5 group">
+                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-teal-100 font-bold mb-1">Privacy First</p>
+                    <span className="text-lg font-medium">Encrypted Data Sync</span>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="pt-10 border-t border-white/10 hidden md:block">
-              <p className="text-sm text-teal-100/60 italic leading-relaxed">
-                "The secret of health for both mind and body is not to mourn for the past, but to live the present moment wisely and earnestly."
+              <p className="text-xs text-teal-100/60 italic leading-relaxed">
+                "We use secure wellness directories to process your aspirations with zero latency and absolute privacy."
               </p>
             </div>
           </div>
@@ -85,123 +141,80 @@ const Contact: React.FC = () => {
           <div className="md:w-7/12 p-12 lg:p-16 bg-white">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Your Full Name</label>
                 <input 
                   type="text" 
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all"
-                  placeholder="How should we address you?"
+                  className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all text-slate-800"
+                  placeholder="e.g. John Doe"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Email Address</label>
                 <input 
                   type="email" 
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all"
-                  placeholder="Where can we reach you?"
+                  className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all text-slate-800"
+                  placeholder="hello@rejuvanaliving.com"
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Message</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Your Message</label>
                 <textarea 
-                  rows={4}
                   required
+                  rows={4}
                   value={formData.message}
                   onChange={(e) => setFormData({...formData, message: e.target.value})}
-                  className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all resize-none"
-                  placeholder="Tell us about your wellness aspirations..."
+                  className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all text-slate-800 resize-none"
+                  placeholder="Tell us about your wellness journey..."
                 />
               </div>
-              
               <button 
-                type="submit"
-                disabled={status === 'loading'}
-                className="w-full py-5 bg-teal-600 text-white rounded-2xl font-bold text-lg hover:bg-teal-700 transition-all flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-70 shadow-lg shadow-teal-100 group overflow-hidden relative"
+                type="submit" 
+                disabled={status === 'syncing'}
+                className={`w-full py-5 rounded-2xl font-bold text-white transition-all shadow-lg active:scale-95 ${
+                  status === 'error' ? 'bg-rose-500' : 'bg-teal-600 hover:bg-teal-700'
+                }`}
               >
-                <AnimatePresence mode="wait">
-                  {status === 'loading' ? (
-                    <motion.div 
-                      key="loading"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      className="flex items-center gap-3"
-                    >
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                      Preparing your path...
-                    </motion.div>
-                  ) : (
-                    <motion.span 
-                      key="idle"
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                    >
-                      Begin Your Wellness Journey
-                    </motion.span>
-                  )}
-                </AnimatePresence>
+                {getButtonText()}
               </button>
-
-              {status === 'error' && (
-                <motion.p 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center text-red-500 font-bold text-sm"
-                >
-                  {errorMessage}
-                </motion.p>
-              )}
             </form>
           </div>
         </div>
       </div>
 
-      {/* Success Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => { setShowModal(false); setStatus('idle'); }}
-              className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
+              onClick={() => setShowModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="relative bg-white rounded-[3rem] p-10 md:p-16 max-w-xl w-full text-center shadow-2xl"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="relative bg-white p-12 rounded-[2.5rem] max-w-md w-full text-center shadow-2xl"
             >
-              <div className="w-24 h-24 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-8 text-teal-600">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-12 h-12">
+              <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               </div>
-              
-              <h3 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-6">
-                Your Journey Begins Today
-              </h3>
-              
-              <p className="text-xl text-slate-600 leading-relaxed mb-10">
-                Great! You have taken your first significant step in Longevity and Healthier living. 
-                Our experts have received your inquiry via Hostinger Reach and will connect with you shortly.
-              </p>
-              
+              <h3 className="text-2xl font-serif font-bold text-slate-900 mb-4">Message Received</h3>
+              <p className="text-slate-600 mb-10 leading-relaxed">Thank you for joining our community. We've synchronized your data and our team will reach out shortly.</p>
               <button 
-                onClick={() => {
-                  setShowModal(false);
-                  setStatus('idle');
-                }}
-                className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold text-lg hover:bg-slate-800 transition-all active:scale-95 shadow-xl"
+                onClick={() => setShowModal(false)}
+                className="w-full py-4 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 transition-all shadow-lg shadow-teal-100"
               >
-                Continue Your Path
+                Return to Site
               </button>
             </motion.div>
           </div>
@@ -211,4 +224,5 @@ const Contact: React.FC = () => {
   );
 };
 
+// Fixed: Added missing default export
 export default Contact;

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Logo from './Logo';
+import Logo from './Logo.tsx';
 
 interface NavbarProps {
   onNavigate: (page: 'home' | 'directory') => void;
@@ -120,5 +120,4 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage }) => {
   );
 };
 
-// Fix: Added missing default export to satisfy App.tsx import
 export default Navbar;

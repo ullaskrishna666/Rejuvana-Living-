@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { HERO_PHRASES } from '../constants';
+import { HERO_PHRASES } from '../constants.tsx';
 
 interface HeroProps {
   onExplore: () => void;

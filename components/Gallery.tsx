@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { WELLNESS_CONTENT } from '../constants';
-import { WellnessCard } from '../types';
+import { WELLNESS_CONTENT } from '../constants.tsx';
+import { WellnessCard } from '../types.ts';
 
 const Gallery: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<WellnessCard | null>(null);

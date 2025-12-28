@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import About from './components/About';
-import Gallery from './components/Gallery';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import Directory from './components/Directory';
-import CustomCursor from './components/CustomCursor';
+import Navbar from './components/Navbar.tsx';
+import Hero from './components/Hero.tsx';
+import About from './components/About.tsx';
+import Gallery from './components/Gallery.tsx';
+import Contact from './components/Contact.tsx';
+import Footer from './components/Footer.tsx';
+import Directory from './components/Directory.tsx';
+import CustomCursor from './components/CustomCursor.tsx';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'home' | 'directory'>('home');

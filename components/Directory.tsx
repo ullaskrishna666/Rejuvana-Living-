@@ -24,6 +24,8 @@ const Directory: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  // Added state to store grounding chunks (URLs) from search
+  const [groundingSources, setGroundingSources] = useState<any[]>([]);
 
   // Update clock every minute
   useEffect(() => {
@@ -74,6 +76,10 @@ const Directory: React.FC = () => {
           }
         }
       });
+
+      // Fixed: Extract grounding chunks as required by the guidelines
+      const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+      setGroundingSources(chunks);
 
       const data = JSON.parse(response.text || '[]');
       const sorted = data.sort((a: SocialPost, b: SocialPost) => 
@@ -187,6 +193,31 @@ const Directory: React.FC = () => {
               {isSyncing ? 'Synchronizing...' : 'Sync Now'}
             </button>
           </div>
+
+          {/* Fixed: Render grounding URLs as required by guidelines */}
+          {groundingSources.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mb-12 text-left bg-slate-50 p-6 rounded-3xl border border-slate-100"
+            >
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Verification Sources:</p>
+              <div className="flex flex-wrap gap-3">
+                {groundingSources.map((chunk, i) => chunk.web && (
+                  <a 
+                    key={i} 
+                    href={chunk.web.uri} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs text-teal-600 hover:text-teal-700 font-medium transition-colors shadow-sm"
+                  >
+                    <ExternalLinkIcon className="w-3 h-3" />
+                    {chunk.web.title || chunk.web.uri}
+                  </a>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </header>
 
         {error && (

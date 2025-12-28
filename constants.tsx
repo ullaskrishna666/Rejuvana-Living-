@@ -1,6 +1,6 @@
 
 // Import the required type for WELLNESS_CONTENT
-import { WellnessCard } from './types';
+import { WellnessCard } from './types.ts';
 
 export const HERO_PHRASES = [
   "Healthier Living, Naturally",
