@@ -1,41 +1,51 @@
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar.tsx';
 import Hero from './components/Hero.tsx';
 import About from './components/About.tsx';
 import Gallery from './components/Gallery.tsx';
+import Directory from './components/Directory.tsx';
 import Contact from './components/Contact.tsx';
 import Footer from './components/Footer.tsx';
-import Directory from './components/Directory.tsx';
 import CustomCursor from './components/CustomCursor.tsx';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'home' | 'directory'>('home');
 
-  // Handle hash changes for simple routing
+  // Handle cross-page section navigation
+  const handleNavigate = (page: 'home' | 'directory', sectionId?: string) => {
+    setCurrentPage(page);
+    
+    // Scroll handling
+    if (sectionId) {
+      // Small delay to allow page transition before scrolling
+      setTimeout(() => {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          const offset = 100;
+          const bodyRect = document.body.getBoundingClientRect().top;
+          const elementRect = el.getBoundingClientRect().top;
+          const elementPosition = elementRect - bodyRect;
+          const offsetPosition = elementPosition - offset;
+          window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === '#directory') {
-        setCurrentPage('directory');
-        window.scrollTo(0, 0);
-      } else {
-        setCurrentPage('home');
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // Initial check
-
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+    window.scrollTo(0, 0);
+  }, [currentPage]);
 
   return (
     <div className="relative min-h-screen bg-[#FDFCFB]">
       <CustomCursor />
-      <Navbar onNavigate={setCurrentPage} currentPage={currentPage} />
+      <Navbar onNavigate={handleNavigate} currentPage={currentPage} />
       
-      <main>
+      <main className="relative z-10">
         <AnimatePresence mode="wait">
           {currentPage === 'home' ? (
             <motion.div
@@ -45,16 +55,9 @@ const App: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Hero onExplore={() => window.location.hash = '#directory'} />
+              <Hero onExplore={() => handleNavigate('home', 'gallery')} />
               <About />
               <Gallery />
-              
-              <div className="w-full overflow-hidden leading-none bg-white">
-                <svg className="relative block w-full h-16 md:h-32 fill-slate-50" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                  <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"></path>
-                </svg>
-              </div>
-
               <div className="bg-slate-50">
                 <Contact />
               </div>
@@ -62,9 +65,9 @@ const App: React.FC = () => {
           ) : (
             <motion.div
               key="directory"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
             >
               <Directory />
@@ -73,7 +76,7 @@ const App: React.FC = () => {
         </AnimatePresence>
       </main>
 
-      <Footer onNavigate={setCurrentPage} />
+      <Footer onNavigate={handleNavigate} />
     </div>
   );
 };

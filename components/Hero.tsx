@@ -7,7 +7,7 @@ interface HeroProps {
   onExplore: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ onExplore }) => {
+const Hero: React.FC<HeroProps> = () => {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
 
   useEffect(() => {
@@ -75,19 +75,13 @@ const Hero: React.FC<HeroProps> = ({ onExplore }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-6"
+          className="flex justify-center"
         >
           <button 
             onClick={scrollToJoin}
-            className="w-full sm:w-auto px-12 py-5 bg-teal-600 text-white rounded-full text-lg font-bold shadow-lg shadow-teal-100 hover:bg-teal-700 hover:shadow-xl transition-all active:scale-95"
+            className="px-16 py-5 bg-teal-600 text-white rounded-full text-lg font-bold shadow-lg shadow-teal-100 hover:bg-teal-700 hover:shadow-xl transition-all active:scale-95"
           >
             Join the Community
-          </button>
-          <button 
-            onClick={onExplore}
-            className="w-full sm:w-auto px-12 py-5 bg-white text-slate-900 border-2 border-slate-100 rounded-full text-lg font-bold hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
-          >
-            Social Directory Hub
           </button>
         </motion.div>
       </div>

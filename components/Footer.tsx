@@ -3,18 +3,18 @@ import React from 'react';
 import Logo from './Logo';
 
 interface FooterProps {
-  onNavigate: (page: 'home' | 'directory') => void;
+  onNavigate: (page: 'home' | 'directory', sectionId?: string) => void;
 }
 
 const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="py-24 bg-white text-slate-500 border-t border-slate-100">
+    <footer className="py-24 bg-white text-slate-500 border-t border-slate-100 relative z-20">
       <div className="container mx-auto px-6 md:px-12">
         <div className="grid md:grid-cols-4 gap-12 mb-20">
           {/* Brand Info */}
           <div className="col-span-1 md:col-span-1">
             <button 
-              onClick={() => { onNavigate('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              onClick={() => onNavigate('home')}
               className="flex items-center mb-8 hover:opacity-80 transition-opacity"
             >
               <Logo className="w-16 h-16" />
@@ -30,8 +30,8 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <ul className="space-y-4">
               <li><button onClick={() => onNavigate('home')} className="text-sm hover:text-teal-600 transition-colors">Home</button></li>
               <li><button onClick={() => onNavigate('directory')} className="text-sm hover:text-teal-600 transition-colors">Social Directory</button></li>
-              <li><a href="#about" className="text-sm hover:text-teal-600 transition-colors">About Us</a></li>
-              <li><a href="#gallery" className="text-sm hover:text-teal-600 transition-colors">Wellness Guides</a></li>
+              <li><button onClick={() => onNavigate('home', 'about')} className="text-sm hover:text-teal-600 transition-colors">About Us</button></li>
+              <li><button onClick={() => onNavigate('home', 'gallery')} className="text-sm hover:text-teal-600 transition-colors">Wellness Guides</button></li>
             </ul>
           </div>
 
@@ -39,10 +39,10 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div className="col-span-1">
             <h4 className="text-slate-900 font-bold mb-6 uppercase text-xs tracking-widest">Knowledge</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-sm hover:text-teal-600 transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="text-sm hover:text-teal-600 transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="text-sm hover:text-teal-600 transition-colors">Cookie Policy</a></li>
-              <li><a href="#join-community" className="text-sm hover:text-teal-600 transition-colors">Contact Support</a></li>
+              <li><button className="text-sm hover:text-teal-600 transition-colors text-left">Privacy Policy</button></li>
+              <li><button className="text-sm hover:text-teal-600 transition-colors text-left">Terms of Service</button></li>
+              <li><button className="text-sm hover:text-teal-600 transition-colors text-left">Cookie Policy</button></li>
+              <li><button onClick={() => onNavigate('home', 'join-community')} className="text-sm hover:text-teal-600 transition-colors text-left">Contact Support</button></li>
             </ul>
           </div>
 

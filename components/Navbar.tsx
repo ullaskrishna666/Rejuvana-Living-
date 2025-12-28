@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo.tsx';
 
 interface NavbarProps {
-  onNavigate: (page: 'home' | 'directory') => void;
+  onNavigate: (page: 'home' | 'directory', sectionId?: string) => void;
   currentPage: 'home' | 'directory';
 }
 
@@ -13,106 +13,83 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate, currentPage }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleNavClick = (page: 'home' | 'directory', sectionId?: string) => {
-    onNavigate(page);
     setIsMobileMenuOpen(false);
-    
-    if (page === 'home' && sectionId) {
-      setTimeout(() => {
-        const el = document.getElementById(sectionId);
-        if (el) {
-          const offset = 100;
-          const bodyRect = document.body.getBoundingClientRect().top;
-          const elementRect = el.getBoundingClientRect().top;
-          const elementPosition = elementRect - bodyRect;
-          const offsetPosition = elementPosition - offset;
-
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-      window.location.hash = sectionId;
-    } else if (page === 'directory') {
-      window.location.hash = 'directory';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      window.location.hash = '';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    onNavigate(page, sectionId);
   };
 
   return (
     <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled || currentPage === 'directory' ? 'bg-white/95 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-6'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 px-6 py-4 md:px-12 md:py-6 ${
+        isScrolled || currentPage === 'directory' ? 'bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm' : 'bg-transparent'
       }`}
     >
-      <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
-        <button onClick={() => handleNavClick('home')} className="flex items-center group transition-transform active:scale-95">
-          <Logo className="w-16 h-16 md:w-20 md:h-20" />
+      <div className="max-w-[1440px] mx-auto flex items-center justify-between">
+        <button onClick={() => handleNavClick('home')} className="flex items-center transition-opacity hover:opacity-80">
+          <Logo className="w-10 h-10 md:w-12 md:h-12" />
         </button>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-10">
-          <button onClick={() => handleNavClick('home', 'about')} className="text-sm font-bold text-slate-600 hover:text-teal-600 transition-colors uppercase tracking-widest">About</button>
-          <button onClick={() => handleNavClick('home', 'gallery')} className="text-sm font-bold text-slate-600 hover:text-teal-600 transition-colors uppercase tracking-widest">Wellness Guides</button>
+        <div className="hidden md:flex items-center gap-14">
+          <button 
+            onClick={() => handleNavClick('home', 'about')} 
+            className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em] hover:text-teal-600 transition-all"
+          >
+            About
+          </button>
+          <button 
+            onClick={() => handleNavClick('home', 'gallery')} 
+            className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em] hover:text-teal-600 transition-all"
+          >
+            Wellness Guides
+          </button>
           <button 
             onClick={() => handleNavClick('directory')} 
-            className={`text-sm font-bold transition-colors uppercase tracking-widest ${currentPage === 'directory' ? 'text-teal-600' : 'text-slate-600 hover:text-teal-600'}`}
+            className={`text-[10px] font-bold uppercase tracking-[0.3em] transition-all ${
+              currentPage === 'directory' ? 'text-teal-600' : 'text-slate-600 hover:text-teal-600'
+            }`}
           >
             Social Directory
           </button>
-          <button onClick={() => handleNavClick('home', 'join-community')} className="text-sm font-bold text-slate-600 hover:text-teal-600 transition-colors uppercase tracking-widest">Contact</button>
-          
+          <button 
+            onClick={() => handleNavClick('home', 'join-community')} 
+            className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em] hover:text-teal-600 transition-all"
+          >
+            Contact
+          </button>
           <button 
             onClick={() => handleNavClick('home', 'join-community')}
-            className="px-8 py-3 bg-teal-600 text-white rounded-full text-sm font-bold hover:bg-teal-700 transition-all active:scale-95 shadow-lg shadow-teal-100"
+            className="px-10 py-3 bg-teal-600 text-white rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:shadow-xl hover:-translate-y-0.5 transition-all shadow-lg shadow-teal-100"
           >
-            Join Community
+            Join Now
           </button>
         </div>
 
         {/* Mobile Toggle */}
-        <button 
-          className="md:hidden p-2 text-slate-800"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
-            <path strokeLinecap="round" strokeLinejoin="round" d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"} />
+        <button className="md:hidden text-slate-900" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d={isMobileMenuOpen ? "M18 6L6 18M6 6l12 12" : "M4 8h16M4 16h16"} />
           </svg>
         </button>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-slate-100 overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="md:hidden absolute top-full left-0 right-0 bg-white border-t border-slate-100 p-12 flex flex-col gap-8 shadow-2xl"
           >
-            <div className="flex flex-col p-6 gap-6">
-              <button onClick={() => handleNavClick('home', 'about')} className="text-left text-sm font-bold text-slate-600 uppercase tracking-widest">About</button>
-              <button onClick={() => handleNavClick('home', 'gallery')} className="text-left text-sm font-bold text-slate-600 uppercase tracking-widest">Wellness Guides</button>
-              <button onClick={() => handleNavClick('directory')} className="text-left text-sm font-bold text-slate-600 uppercase tracking-widest">Social Directory</button>
-              <button onClick={() => handleNavClick('home', 'join-community')} className="text-left text-sm font-bold text-slate-600 uppercase tracking-widest">Contact</button>
-              <button 
-                onClick={() => handleNavClick('home', 'join-community')}
-                className="w-full py-4 bg-teal-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-teal-100"
-              >
-                Join Community
-              </button>
-            </div>
+            <button onClick={() => handleNavClick('home', 'about')} className="text-center text-xs font-bold text-slate-900 uppercase tracking-[0.4em]">About</button>
+            <button onClick={() => handleNavClick('home', 'gallery')} className="text-center text-xs font-bold text-slate-900 uppercase tracking-[0.4em]">Wellness Guides</button>
+            <button onClick={() => handleNavClick('directory')} className="text-center text-xs font-bold text-teal-600 uppercase tracking-[0.4em]">Social Directory</button>
+            <button onClick={() => handleNavClick('home', 'join-community')} className="text-center text-xs font-bold text-slate-900 uppercase tracking-[0.4em]">Contact</button>
           </motion.div>
         )}
       </AnimatePresence>
