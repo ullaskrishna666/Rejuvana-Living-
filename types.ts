@@ -1,4 +1,7 @@
 
+// Shared navigation type to ensure consistency across components
+export type Page = 'home' | 'directory' | 'privacy' | 'terms' | 'cookies';
+
 export interface WellnessCard {
   id: number;
   title: string;

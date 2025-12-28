@@ -34,11 +34,54 @@ const Hero: React.FC<HeroProps> = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Background Shapes */}
-      <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-teal-50 rounded-full blur-3xl opacity-60 -z-10" />
-      <div className="absolute bottom-[5%] left-[-10%] w-[50vw] h-[50vw] bg-emerald-50 rounded-full blur-3xl opacity-60 -z-10" />
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
+      {/* --- Dynamic Background System --- */}
+      <div className="absolute inset-0 -z-10 pointer-events-none">
+        {/* Blob 1: Teal (Top Right) */}
+        <motion.div 
+          animate={{
+            x: [0, 40, 0],
+            y: [0, -30, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-[10%] -right-[5%] w-[60vw] h-[60vw] bg-teal-100/40 rounded-full blur-[120px]" 
+        />
+        
+        {/* Blob 2: Emerald (Bottom Left) */}
+        <motion.div 
+          animate={{
+            x: [0, -50, 0],
+            y: [0, 40, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute -bottom-[20%] -left-[10%] w-[70vw] h-[70vw] bg-emerald-100/30 rounded-full blur-[140px]" 
+        />
 
+        {/* Blob 3: Soft Indigo (Top Left) */}
+        <motion.div 
+          animate={{
+            x: [0, 30, 0],
+            y: [0, 50, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute top-[10%] left-[-5%] w-[45vw] h-[45vw] bg-indigo-50/50 rounded-full blur-[100px]" 
+        />
+
+        {/* Blob 4: Soft Amber (Bottom Right) */}
+        <motion.div 
+          animate={{
+            x: [0, -30, 0],
+            y: [0, -60, 0],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+          className="absolute bottom-[5%] right-[5%] w-[40vw] h-[40vw] bg-amber-50/60 rounded-full blur-[110px]" 
+        />
+      </div>
+
+      {/* --- Content Area --- */}
       <div className="container mx-auto px-6 md:px-12 text-center z-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -54,7 +97,7 @@ const Hero: React.FC<HeroProps> = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-slate-900 leading-[1.1]"
+                className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-slate-900 leading-[1.1] tracking-tight"
               >
                 {HERO_PHRASES[currentPhraseIndex]}
               </motion.h1>
@@ -79,9 +122,12 @@ const Hero: React.FC<HeroProps> = () => {
         >
           <button 
             onClick={scrollToJoin}
-            className="px-16 py-5 bg-teal-600 text-white rounded-full text-lg font-bold shadow-lg shadow-teal-100 hover:bg-teal-700 hover:shadow-xl transition-all active:scale-95"
+            className="group relative px-16 py-5 bg-teal-600 text-white rounded-full text-lg font-bold shadow-2xl shadow-teal-100 hover:bg-teal-700 transition-all active:scale-95 overflow-hidden"
           >
-            Join the Community
+            <span className="relative z-10">Join the Community</span>
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-r from-teal-400 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            />
           </button>
         </motion.div>
       </div>
@@ -92,7 +138,7 @@ const Hero: React.FC<HeroProps> = () => {
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         className="absolute bottom-12 left-1/2 -translate-x-1/2 text-slate-300"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 opacity-40">
           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
         </svg>
       </motion.div>

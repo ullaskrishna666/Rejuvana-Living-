@@ -10,7 +10,7 @@ const CustomCursor: React.FC = () => {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Smooth springs for the trailing effect
+  // Smooth springs for the trailing effect of the outer ring
   const springConfig = { damping: 25, stiffness: 150 };
   const cursorX = useSpring(mouseX, springConfig);
   const cursorY = useSpring(mouseY, springConfig);
@@ -24,12 +24,15 @@ const CustomCursor: React.FC = () => {
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+      // Define what elements trigger the "interactive" cursor state
       const isInteractive = 
         target.closest('button') || 
         target.closest('a') || 
         target.closest('input') || 
         target.closest('textarea') ||
-        target.getAttribute('role') === 'button';
+        target.closest('label') ||
+        target.closest('[role="button"]') ||
+        window.getComputedStyle(target).cursor === 'pointer';
       
       setIsHovering(!!isInteractive);
     };
@@ -55,16 +58,17 @@ const CustomCursor: React.FC = () => {
       <style>
         {`
           @media (hover: hover) and (pointer: fine) {
-            body, a, button, input, textarea {
+            /* Remove standard cursor globally to allow custom cursor to shine */
+            body, a, button, input, textarea, [role="button"], label {
               cursor: none !important;
             }
           }
         `}
       </style>
       
-      {/* Outer Ring - Follows with a lag */}
+      {/* Outer Ring - Follows with a slight aesthetic lag and pulses on hover */}
       <motion.div
-        className="fixed top-0 left-0 w-10 h-10 border-2 border-teal-500/30 rounded-full pointer-events-none z-[9999] hidden md:block"
+        className="fixed top-0 left-0 w-10 h-10 border-2 border-teal-500/40 rounded-full pointer-events-none z-[9999] hidden md:block"
         style={{
           x: cursorX,
           y: cursorY,
@@ -72,17 +76,26 @@ const CustomCursor: React.FC = () => {
           translateY: '-50%',
         }}
         animate={{
-          scale: isHovering ? 1.8 : 1,
-          backgroundColor: isHovering ? 'rgba(20, 184, 166, 0.1)' : 'rgba(20, 184, 166, 0)',
+          scale: isHovering ? [1.6, 1.9, 1.6] : 1,
+          backgroundColor: isHovering ? 'rgba(20, 184, 166, 0.15)' : 'rgba(20, 184, 166, 0)',
           borderColor: isHovering ? 'rgba(20, 184, 166, 0.8)' : 'rgba(20, 184, 166, 0.3)',
-          backdropFilter: isHovering ? 'blur(2px)' : 'blur(0px)',
+          backdropFilter: isHovering ? 'blur(4px)' : 'blur(0px)',
           opacity: isVisible ? 1 : 0,
+        }}
+        transition={{
+          scale: isHovering 
+            ? { repeat: Infinity, duration: 1.8, ease: "easeInOut" } 
+            : { type: "spring", damping: 20, stiffness: 150 },
+          backgroundColor: { duration: 0.3 },
+          borderColor: { duration: 0.3 },
+          backdropFilter: { duration: 0.3 },
+          opacity: { duration: 0.2 }
         }}
       />
 
-      {/* Inner Dot - Precise follow */}
+      {/* Inner Dot - Precise follow, disappears on interactive hover to emphasize the ring */}
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-teal-600 rounded-full pointer-events-none z-[10000] hidden md:block"
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-teal-600 rounded-full pointer-events-none z-[10000] hidden md:block"
         style={{
           x: mouseX,
           y: mouseY,
@@ -90,8 +103,13 @@ const CustomCursor: React.FC = () => {
           translateY: '-50%',
         }}
         animate={{
-          scale: isHovering ? 0.5 : 1,
+          scale: isHovering ? 0 : 1,
           opacity: isVisible ? 1 : 0,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 400,
+          damping: 25
         }}
       />
     </>
